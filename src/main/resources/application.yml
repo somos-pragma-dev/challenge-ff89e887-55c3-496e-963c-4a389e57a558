@@ -1,0 +1,69 @@
+package com.example.ecommerce.service;
+
+import com.example.ecommerce.model.Product;
+import com.example.ecommerce.repository.ProductRepository;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import java.util.Arrays;
+import java.util.Optional;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.*;
+
+@SpringBootTest
+public class ProductServiceTest {
+    @Mock
+    private ProductRepository productRepository;
+
+    @InjectMocks
+    private ProductService productService;
+
+    public ProductServiceTest() {
+        MockitoAnnotations.openMocks(this);
+    }
+
+    @Test
+    public void testGetAllProducts() {
+        Page<Product> products = new PageImpl<>(Arrays.asList(new Product(), new Product()));
+        when(productRepository.findAll((Pageable) any())).thenReturn(products);
+        Page<Product> result = productService.getAllProducts(null);
+        assertEquals(2, result.getTotalElements());
+    }
+
+    @Test
+    public void testGetProductById() {
+        Product product = new Product();
+        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+        Product result = productService.getProductById(1L);
+        assertEquals(product, result);
+    }
+
+    @Test
+    public void testCreateProduct() {
+        Product product = new Product();
+        when(productRepository.save(product)).thenReturn(product);
+        Product result = productService.createProduct(product);
+        assertEquals(product, result);
+    }
+
+    @Test
+    public void testUpdateProduct() {
+        Product product = new Product();
+        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+        when(productRepository.save(product)).thenReturn(product);
+        Product result = productService.updateProduct(1L, product);
+        assertEquals(product, result);
+    }
+
+    @Test
+    public void testDeleteProduct() {
+        doNothing().when(productRepository).deleteById(1L);
+        productService.deleteProduct(1L);
+        verify(productRepository, times(1)).deleteById(1L);
+    }
+}
